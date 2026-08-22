@@ -1,82 +1,93 @@
-import { pgTable, serial, text, doublePrecision, integer, date, boolean, timestamp } from "drizzle-orm/pg-core";
-
-// --- Shared timestamp columns for consistency ---
-const timestamps = {
-  createdAt: timestamp("created_at").defaultNow().notNull(),
-  updatedAt: timestamp("updated_at").defaultNow().notNull().$onUpdate(() => new Date()),
-  deletedAt: timestamp("deleted_at"), // null = active, set = soft-deleted
-};
-
-export const drugs = pgTable("drugs", {
-  id: serial("id").primaryKey(),
-  commercialNameEn: text("commercial_name_en").notNull(),
-  commercialNameAr: text("commercial_name_ar").default("N/A").notNull(),
-  scientificName: text("scientific_name").default("N/A").notNull(),
-  manufacturer: text("manufacturer").default("N/A").notNull(),
-  drugClass: text("drug_class").default("N/A").notNull(),
-  route: text("route").default("N/A").notNull(),
-  priceEgp: doublePrecision("price_egp").notNull(),
-  ...timestamps,
-});
-
-export const inventory = pgTable("inventory", {
-  id: serial("id").primaryKey(),
-  drugId: integer("drug_id")
-    .references(() => drugs.id)
-    .notNull(),
-  quantity: integer("quantity").notNull().default(0),
-  batchNumber: text("batch_number").default("N/A").notNull(),
-  expiryDate: date("expiry_date").notNull(),
-  purchasePrice: doublePrecision("purchase_price").notNull(),
-  sellingPrice: doublePrecision("selling_price").notNull(),
-  ...timestamps,
-});
+import { boolean, doublePrecision, integer, pgTable, primaryKey, serial, text, timestamp } from "drizzle-orm/pg-core";
 
 export const users = pgTable("users", {
   id: serial("id").primaryKey(),
-  email: text("email").notNull().unique(), // e.g., 'sarah_p'
-  pin: text("pin").notNull(), // A hashed 4-digit PIN for quick login on the counter terminal
-  fullName: text("full_name").notNull(),
-  role: text("student").default("student").notNull(), // 'admin', 'pharmacist', 'cashier'
-  ...timestamps,
+  name: text("name").notNull(),
+  email: text("email").notNull().unique(),
+  passwordHash: text("password_hash").notNull(),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
 });
 
-export const sales = pgTable("sales", {
+export const courses = pgTable("courses", {
+  id: serial("id").primaryKey(),
+  title: text("title").notNull(),
+  description: text("description").notNull(),
+  price: doublePrecision("price").notNull(),
+  instructorId: integer("instructor_id")
+    .references(() => users.id)
+    .notNull(),
+});
+
+export const lessons = pgTable("lessons", {
+  id: serial("id").primaryKey(),
+  courseId: integer("course_id")
+    .references(() => courses.id)
+    .notNull(),
+  title: text("title").notNull(),
+  duration: integer("duration").notNull(),
+  videoId: integer("video_id")
+    .references(() => videos.id)
+    .notNull(),
+  orderIndex: integer("order_index").notNull(),
+});
+
+export const videos = pgTable("videos", {
+  id: serial("id").primaryKey(),
+  storageKey: text("storage_key").notNull().unique(),
+  duration: integer("duration").notNull(),
+  status: text("status").notNull(),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+});
+
+export const enrollments = pgTable("enrollments", {
+  userId: integer("user_id")
+    .references(() => users.id)
+    .notNull(),
+  courseId: integer("course_id")
+    .references(() => courses.id)
+    .notNull(),
+  enrolledAt: timestamp("enrolled_at").defaultNow().notNull(),
+  status: text("status").notNull(),
+}, (table) => [
+  primaryKey({ columns: [table.userId, table.courseId] }),
+]);
+
+export const watchProgress = pgTable("watch_progress", {
+  userId: integer("user_id")
+    .references(() => users.id)
+    .notNull(),
+  lessonId: integer("lesson_id")
+    .references(() => lessons.id)
+    .notNull(),
+  positionSeconds: integer("position_seconds").notNull().default(0),
+  completed: boolean("completed").notNull().default(false),
+  updatedAt: timestamp("updated_at").defaultNow().notNull(),
+}, (table) => [
+  primaryKey({ columns: [table.userId, table.lessonId] }),
+]);
+
+export const devices = pgTable("devices", {
   id: serial("id").primaryKey(),
   userId: integer("user_id")
     .references(() => users.id)
     .notNull(),
-  totalAmount: doublePrecision("total_amount").notNull(),
-  paymentMethod: text("payment_method").default("cash").notNull(), // e.g., 'cash', 'card', 'insurance'
-  ...timestamps,
+  deviceId: text("device_id").notNull(),
+  deviceType: text("device_type").notNull(),
+  lastUsedAt: timestamp("last_used_at").defaultNow().notNull(),
 });
-
-export const saleItems = pgTable("sale_items", {
-  id: serial("id").primaryKey(),
-  saleId: integer("sale_id")
-    .references(() => sales.id)
-    .notNull(),
-  drugId: integer("drug_id")
-    .references(() => drugs.id)
-    .notNull(),
-  quantity: integer("quantity").notNull(),
-  priceAtSale: doublePrecision("price_at_sale").notNull(), // Capture selling price at moment of sale
-  ...timestamps,
-});
-
-// --- Exported TypeScript Types ---
-export type Drug = typeof drugs.$inferSelect;
-export type NewDrug = typeof drugs.$inferInsert;
-
-export type InventoryItem = typeof inventory.$inferSelect;
-export type NewInventoryItem = typeof inventory.$inferInsert;
 
 export type User = typeof users.$inferSelect;
 export type NewUser = typeof users.$inferInsert;
-
-export type Sale = typeof sales.$inferSelect;
-export type NewSale = typeof sales.$inferInsert;
-
-export type SaleItem = typeof saleItems.$inferSelect;
-export type NewSaleItem = typeof saleItems.$inferInsert;
+export type Course = typeof courses.$inferSelect;
+export type NewCourse = typeof courses.$inferInsert;
+export type Lesson = typeof lessons.$inferSelect;
+export type NewLesson = typeof lessons.$inferInsert;
+export type Video = typeof videos.$inferSelect;
+export type NewVideo = typeof videos.$inferInsert;
+export type Enrollment = typeof enrollments.$inferSelect;
+export type NewEnrollment = typeof enrollments.$inferInsert;
+export type WatchProgress = typeof watchProgress.$inferSelect;
+export type NewWatchProgress = typeof watchProgress.$inferInsert;
+export type Device = typeof devices.$inferSelect;
+export type NewDevice = typeof devices.$inferInsert;
 
