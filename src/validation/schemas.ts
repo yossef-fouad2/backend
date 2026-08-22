@@ -30,7 +30,7 @@ export const createInventorySchema = z.object({
   drugId: z.number().int().positive(),
   quantity: z.number().int().min(0).default(0),
   batchNumber: z.string().default("N/A"),
-  expiryDate: z.string().date("Must be a valid date (YYYY-MM-DD)"),
+  expiryDate: z.iso.date("Must be a valid date (YYYY-MM-DD)"),
   purchasePrice: z.number().positive(),
   sellingPrice: z.number().positive(),
 });
