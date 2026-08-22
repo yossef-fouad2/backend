@@ -2,7 +2,7 @@ import { z } from "zod";
 
 // --- Auth ---
 export const signupSchema = z.object({
-  username: z.string().min(1, "Username is required"),
+  email: z.email("A valid email is required"),
   pin: z.string().regex(/^\d{4}$/, "PIN must be exactly 4 digits"),
   fullName: z.string().min(1, "Full name is required"),
   role: z.enum(["admin", "pharmacist", "cashier"]).default("pharmacist"),
@@ -10,7 +10,7 @@ export const signupSchema = z.object({
 
 
 export const loginSchema = z.object({
-  username: z.string().min(1, "Username is required"),
+  email: z.email("A valid email is required"),
   pin: z.string().regex(/^\d{4}$/, "PIN must be exactly 4 digits"),
 });
 

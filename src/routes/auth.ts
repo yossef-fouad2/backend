@@ -27,15 +27,15 @@ async function verifyPin(pin: string, storedHash: string): Promise<boolean> {
 }
 
 authRouter.post("/signup", validate(signupSchema), async (req: Request, res: Response) => {
-    const { username, pin, fullName, role } = req.body as SignupInput;
+    const { email, pin, fullName, role } = req.body as SignupInput;
 
-    // 1. Check if username is already taken
+    // 1. Check if email is already taken
     const existingUser = await db.
         select().from(users).
-        where(eq(users.username, username));
+        where(eq(users.email, email));
 
     if (existingUser.length > 0) {
-        return res.status(400).json({ error: "User with the same username already exists" });
+        return res.status(400).json({ error: "User with the same email already exists" });
     }
 
     // 2. Hash PIN
@@ -43,7 +43,7 @@ authRouter.post("/signup", validate(signupSchema), async (req: Request, res: Res
 
     // 3. Insert new user into the database
     const [user] = await db.insert(users).values({
-        username,
+        email,
         pin: hashedPin,
         fullName,
         role,
@@ -62,15 +62,15 @@ authRouter.post("/signup", validate(signupSchema), async (req: Request, res: Res
 });
 
 authRouter.post("/login", validate(loginSchema), async (req: Request, res: Response) => {
-    const { username, pin } = req.body as LoginInput;
+    const { email, pin } = req.body as LoginInput;
 
-    // 1. Find user by username
+    // 1. Find user by email
     const [user] = await db.
         select().from(users).
-        where(eq(users.username, username));
+        where(eq(users.email, email));
 
     if (!user) {
-        return res.status(401).json({ error: "Invalid username or PIN" });
+        return res.status(401).json({ error: "Invalid email or PIN" });
     }
 
     // 2. Verify PIN
@@ -81,7 +81,7 @@ authRouter.post("/login", validate(loginSchema), async (req: Request, res: Respo
 
 
     const { pin: _, deletedAt: __, ...safeUser } = user;
-    const token = jwt.sign({ id: user.id, username: user.username, role: user.role },
+    const token = jwt.sign({ id: user.id, email: user.email, role: user.role },
         process.env.JWT_SECRET as string, { expiresIn: "8h" });
 
     return res.status(200).json({

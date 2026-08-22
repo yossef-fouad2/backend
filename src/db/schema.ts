@@ -34,10 +34,10 @@ export const inventory = pgTable("inventory", {
 
 export const users = pgTable("users", {
   id: serial("id").primaryKey(),
-  username: text("username").notNull().unique(), // e.g., 'sarah_p'
+  email: text("email").notNull().unique(), // e.g., 'sarah_p'
   pin: text("pin").notNull(), // A hashed 4-digit PIN for quick login on the counter terminal
   fullName: text("full_name").notNull(),
-  role: text("role").default("pharmacist").notNull(), // 'admin', 'pharmacist', 'cashier'
+  role: text("student").default("student").notNull(), // 'admin', 'pharmacist', 'cashier'
   ...timestamps,
 });
 
@@ -79,4 +79,4 @@ export type NewSale = typeof sales.$inferInsert;
 
 export type SaleItem = typeof saleItems.$inferSelect;
 export type NewSaleItem = typeof saleItems.$inferInsert;
-
+
