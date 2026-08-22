@@ -8,6 +8,13 @@
       "when": 1783886380961,
       "tag": "0000_low_blob",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "7",
+      "when": 1787405958209,
+      "tag": "0001_fuzzy_thena",
+      "breakpoints": true
     }
   ]
 }

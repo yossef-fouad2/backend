@@ -76,6 +76,10 @@ export const devices = pgTable("devices", {
   lastUsedAt: timestamp("last_used_at").defaultNow().notNull(),
 });
 
+
+
+
+
 export type User = typeof users.$inferSelect;
 export type NewUser = typeof users.$inferInsert;
 export type Course = typeof courses.$inferSelect;
