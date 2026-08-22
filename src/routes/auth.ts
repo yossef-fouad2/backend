@@ -38,7 +38,7 @@ authRouter.post("/signup", validate(signupSchema), async (req: Request, res: Res
         return res.status(400).json({ error: "User with the same email already exists" });
     }
 
-    // 2. Hash PIN
+    // 2. Hash Password
     const passwordHash = await hashPassword(password);
 
     // 3. Insert new user into the database
@@ -69,10 +69,10 @@ authRouter.post("/login", validate(loginSchema), async (req: Request, res: Respo
         where(eq(users.email, email));
 
     if (!user) {
-        return res.status(401).json({ error: "Invalid email or PIN" });
+        return res.status(401).json({ error: "Invalid email or password" });
     }
 
-    // 2. Verify PIN
+    // 2. Verify Password
     const isMatch = await verifyPassword(password, user.passwordHash);
     if (!isMatch) {
         return res.status(401).json({ error: "Invalid email or password" });
@@ -81,7 +81,7 @@ authRouter.post("/login", validate(loginSchema), async (req: Request, res: Respo
 
     const { passwordHash: _, ...safeUser } = user;
     const token = jwt.sign({ id: user.id, email: user.email },
-        process.env.JWT_SECRET as string, { expiresIn: "8h" });
+        process.env.JWT_SECRET as string, { expiresIn: "4h" });
 
     return res.status(200).json({
         message: "Login successful",
