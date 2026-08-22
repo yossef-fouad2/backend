@@ -7,7 +7,6 @@ export const signupSchema = z.object({
   name: z.string().min(1, "Name is required"),
 });
 
-
 export const loginSchema = z.object({
   email: z.email("A valid email is required"),
   password: z.string().min(1, "Password is required"),
@@ -45,9 +44,16 @@ export const createSaleSchema = z.object({
         drugId: z.number().int().positive(),
         quantity: z.number().int().positive(),
         priceAtSale: z.number().positive(),
-      })
+      }),
     )
     .min(1, "At least one sale item is required"),
+});
+
+// --- Courses ---
+export const listCoursesQuerySchema = z.object({
+  page: z.coerce.number().int().positive().default(1),
+  limit: z.coerce.number().int().min(1).max(50).default(10),
+  category: z.string().trim().min(1).optional(),
 });
 
 // --- Inferred TypeScript types ---
@@ -56,3 +62,4 @@ export type LoginInput = z.infer<typeof loginSchema>;
 export type CreateDrugInput = z.infer<typeof createDrugSchema>;
 export type CreateInventoryInput = z.infer<typeof createInventorySchema>;
 export type CreateSaleInput = z.infer<typeof createSaleSchema>;
+export type ListCoursesQueryInput = z.infer<typeof listCoursesQuerySchema>;

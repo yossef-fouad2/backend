@@ -12,6 +12,7 @@ import { requestLogger } from "./middleware/requestLogger.js";
 import { errorHandler } from "./middleware/errorHandler.js";
 import userRouter from "./routes/users.js";
 import requireAuth from "./middleware/requireAuth.js";
+import coursesRouter from "./routes/courses.js";
 
 const app = express();
 
@@ -22,6 +23,7 @@ app.use(express.urlencoded({ extended: true }));
 // my features
 app.use("/auth", authRouter);
 app.use("/users", requireAuth, userRouter);
+app.use("/courses", coursesRouter);
 
 app.get("/", (req, res) => {
   res.send("Welcome to the system!");
