@@ -1,3 +1,6 @@
+# --- TEMPORARY: old backend copy, delete this line once apps/_backend_old is gone ---
+/apps/_backend_old/
+
 # --- Node / backend ---
 node_modules/
 dist/
