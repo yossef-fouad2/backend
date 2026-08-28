@@ -7,6 +7,7 @@ import {
   serial,
   text,
   timestamp,
+  unique,
 } from "drizzle-orm/pg-core";
 
 export const users = pgTable("users", {
@@ -22,10 +23,11 @@ export const courses = pgTable("courses", {
   title: text("title").notNull(),
   description: text("description").notNull(),
   category: text("category").notNull().default("general"),
-  price: doublePrecision("price").notNull(),
+  price: integer("price").notNull(),
   instructorId: integer("instructor_id")
-    .references(() => users.id)
-    .notNull(),
+  .references(() => users.id)
+  .notNull(),
+  deletedAt: timestamp("deleted_at").defaultNow().notNull(),
 });
 
 export const lessons = pgTable("lessons", {
@@ -52,6 +54,7 @@ export const videos = pgTable("videos", {
 export const enrollments = pgTable(
   "enrollments",
   {
+    id: integer("id").primaryKey().generatedAlwaysAsIdentity(),
     userId: integer("user_id")
       .references(() => users.id)
       .notNull(),
@@ -59,9 +62,18 @@ export const enrollments = pgTable(
       .references(() => courses.id)
       .notNull(),
     enrolledAt: timestamp("enrolled_at").defaultNow().notNull(),
+    termId: integer("term_id").notNull(),
+    validFrom: timestamp("valid_from").notNull(),
+    validUntil: timestamp("valid_until").notNull(),
     status: text("status").notNull(),
   },
-  (table) => [primaryKey({ columns: [table.userId, table.courseId] })],
+  (table) => ([
+     unique("userCourseTermUnique").on(
+      table.userId,
+      table.courseId,
+      table.termId
+    ),
+  ]),
 );
 
 export const watchProgress = pgTable(
@@ -88,7 +100,14 @@ export const devices = pgTable("devices", {
   deviceId: text("device_id").notNull(),
   deviceType: text("device_type").notNull(),
   lastUsedAt: timestamp("last_used_at").defaultNow().notNull(),
-});
+},
+   (table) => ([
+     unique("user_device_unique").on(
+      table.userId,
+      table.deviceId,
+    ),
+  ]),
+);
 
 export type User = typeof users.$inferSelect;
 export type NewUser = typeof users.$inferInsert;
