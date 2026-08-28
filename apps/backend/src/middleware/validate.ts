@@ -2,13 +2,13 @@ import type { Request, Response, NextFunction } from "express";
 import type { ZodType } from "zod";
 
 /**
- * Express middleware that validates req.body against a Zod schema.
- * On success: replaces req.body with the parsed (coerced + defaulted) data and calls next().
+ * Express middleware that validates req[source] against a Zod schema.
+ * On success: replaces req[source] with the parsed (coerced + defaulted) data and calls next().
  * On failure: returns 400 with structured field-level errors.
  */
-export function validate(schema: ZodType) {
+export function validate(schema: ZodType, source: "body" | "query" | "params" = "body") {
   return (req: Request, res: Response, next: NextFunction) => {
-    const result = schema.safeParse(req.body);
+    const result = schema.safeParse(req[source]);
 
     if (!result.success) {
       // Build field-level error map from issues
@@ -24,8 +24,8 @@ export function validate(schema: ZodType) {
       });
       return;
     }
-
-    req.body = result.data;
+    
+    req.validated = result.data;
     next();
   };
 }
