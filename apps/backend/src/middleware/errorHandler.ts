@@ -16,3 +16,9 @@ export function errorHandler(
 
   res.status(500).json({ error: message });
 }
+//  have to make error response shape consistent
+//  gotta make sure to add this middleware to the end of
+//  the middleware stack in your Express app,
+//  after all other routes and middleware have been defined.
+//  This ensures that any unhandled errors
+//  are caught and processed by this error handler.
