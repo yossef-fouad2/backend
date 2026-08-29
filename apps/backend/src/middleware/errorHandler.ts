@@ -15,6 +15,7 @@ export function errorHandler(
     : err.message || "Unknown error";
 
   res.status(500).json({ error: message });
+  const x = 1;
 }
 //  have to make error response shape consistent
 //  gotta make sure to add this middleware to the end of
