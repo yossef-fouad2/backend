@@ -13,6 +13,7 @@ import { errorHandler } from "./middleware/errorHandler.js";
 import userRouter from "./routes/users.js";
 import requireAuth from "./middleware/requireAuth.js";
 import coursesRouter from "./routes/courses.js";
+import { connectDatabase } from "./db/index.js";
 
 const app = express();
 
@@ -32,6 +33,13 @@ app.get("/", (req, res) => {
 // Error handler must be defined last
 app.use(errorHandler);
 
+try {
+  await connectDatabase();
+} catch (err) {
+  logger.fatal(err, "failed to connect to the database");
+  process.exit(1);
+}
+
 app.listen(8000, () => {
-  console.log("server is running on port 8000");
+  logger.info("server is running on port 8000");
 });
