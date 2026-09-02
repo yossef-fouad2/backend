@@ -2,6 +2,9 @@ import { desc, eq, sql } from "drizzle-orm";
 import { db } from "../db/index.js";
 import { courses } from "../db/schema.js";
 
+
+await db;
+
 export type ListCoursesInput = {
   page: number;
   limit: number;
