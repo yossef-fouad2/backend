@@ -20,11 +20,17 @@ export const db = drizzle(pool);
 
 /** Verifies the database is reachable. Throws if it is not. */
 export async function connectDatabase() {
-  const client = await pool.connect();
-  try {
-    await client.query("select 1");
-    logger.info("successfully connected to the database");
-  } finally {
-    client.release();
-  }
+  for(let i = 0; i <= 10; i++){
+    try {
+      // const client = await pool.connect();
+      await pool.query("select 1");
+      logger.info("successfully connected to the database");
+      return;
+    } catch{
+      logger.warn('database was not ready (attempt${i}/10), retrying in 2s');
+      await new Promise((resolve) => setTimeout(resolve, 2000));
+
+    } 
+    }
+  throw new Error("could not connect to the database");
 }
